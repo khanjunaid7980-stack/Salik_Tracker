@@ -1,0 +1,42 @@
+name: Collect Traffic Data
+
+# Runs every 30 minutes during UTC 02:00–20:59 (= Dubai 06:00–00:59).
+# This skips the Salik toll-free window (Dubai 01:00–05:59 = UTC 21:00–01:59),
+# keeping daily TomTom API usage at ~304 calls/day (free tier limit: 2,500/day).
+on:
+  schedule:
+    - cron: "*/30 2-20 * * *"
+  workflow_dispatch: # allow manual trigger for testing
+
+permissions:
+  contents: write # required to commit and push the updated CSV
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run collector
+        run: python collector.py
+        env:
+          TOMTOM_API_KEY: ${{ secrets.TOMTOM_API_KEY }}
+
+      - name: Commit and push updated CSV
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/traffic_log.csv
+          # Only commit if there are staged changes (skip no-op runs)
+          git diff --cached --quiet || git commit -m "chore: update traffic log $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push
