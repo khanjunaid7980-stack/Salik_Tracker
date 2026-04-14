@@ -6,409 +6,440 @@
 <title>Salik Traffic Monitor</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  :root {
-    --bg: #0f172a; --surface: #1e293b; --border: #334155;
-    --text: #f1f5f9; --muted: #94a3b8; --accent: #6366f1;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; padding: 24px; }
-  h1 { font-size: 1.5rem; margin-bottom: 4px; }
-  .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }
-  .stat-row { display: flex; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
-  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-               padding: 16px 24px; flex: 1; min-width: 160px; }
-  .stat-box .val { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
-  .stat-box .lbl { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
-  .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 14px; color: var(--muted);
-                    text-transform: uppercase; letter-spacing: .05em; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 16px; margin-bottom: 32px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
-  .card.empty { opacity: .5; }
-  .gate-name { font-weight: 700; font-size: 1rem; margin-bottom: 12px; }
-  .congestion-bar-wrap { background: var(--border); border-radius: 99px; height: 8px; margin-bottom: 6px; overflow: hidden; }
-  .congestion-bar { height: 100%; border-radius: 99px; transition: width .5s; }
-  .congestion-label { font-size: 0.78rem; margin-bottom: 12px; }
-  .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-  .metric { background: var(--bg); border-radius: 8px; padding: 8px 10px; }
-  .mval { display: block; font-size: 1.25rem; font-weight: 700; }
-  .mlbl { font-size: 0.7rem; color: var(--muted); }
-  .revenue { font-size: 1rem; font-weight: 700; color: #22c55e; }
-  .tariff-badge { font-size: 0.72rem; color: var(--muted); font-weight: 400; }
-  .no-data { color: var(--muted); font-size: 0.85rem; }
-  .charts { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 32px; }
-  @media(max-width:768px) { .charts { grid-template-columns: 1fr; } }
-  .chart-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-  th { color: var(--muted); font-weight: 500; text-align: left; padding: 8px 12px;
-        border-bottom: 1px solid var(--border); font-size: 0.75rem; text-transform: uppercase; }
-  td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(255,255,255,.03); }
-  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-                 padding: 20px; overflow-x: auto; }
-  .refresh-note { color: var(--muted); font-size: 0.75rem; margin-top: 20px; text-align: center; }
+  :root{--bg:#0f172a;--sur:#1e293b;--bor:#334155;--txt:#f1f5f9;--mut:#94a3b8;--acc:#6366f1}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font-family:system-ui,sans-serif;padding:24px}
+  h1{font-size:1.5rem;margin-bottom:4px}
+  .sub{color:var(--mut);font-size:.85rem;margin-bottom:24px}
+  .sec{font-size:.8rem;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin:28px 0 14px}
+  /* Stat row */
+  .stats{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+  .sbox{background:var(--sur);border:1px solid var(--bor);border-radius:12px;padding:16px 22px;flex:1;min-width:160px}
+  .sbox .v{font-size:1.7rem;font-weight:700;color:var(--acc)}
+  .sbox .l{font-size:.75rem;color:var(--mut);margin-top:4px}
+  /* Gate cards */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-bottom:8px}
+  .card{background:var(--sur);border:1px solid var(--bor);border-radius:12px;padding:18px}
+  .card.empty{opacity:.5}
+  .gate-name{font-weight:700;margin-bottom:10px}
+  .cbar-wrap{background:var(--bor);border-radius:99px;height:7px;margin-bottom:5px;overflow:hidden}
+  .cbar{height:100%;border-radius:99px}
+  .clabel{font-size:.75rem;margin-bottom:10px}
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+  .m{background:var(--bg);border-radius:8px;padding:7px 10px}
+  .mv{display:block;font-size:1.2rem;font-weight:700}
+  .ml{font-size:.68rem;color:var(--mut)}
+  .rev{font-size:.95rem;font-weight:700;color:#22c55e}
+  .tbadge{font-size:.7rem;color:var(--mut);font-weight:400}
+  .no-data{color:var(--mut);font-size:.85rem}
+  /* Charts */
+  .charts2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:8px}
+  .charts1{margin-bottom:8px}
+  @media(max-width:760px){.charts2{grid-template-columns:1fr}}
+  .cbox{background:var(--sur);border:1px solid var(--bor);border-radius:12px;padding:18px}
+  /* Annual table */
+  .twrap{background:var(--sur);border:1px solid var(--bor);border-radius:12px;padding:20px;overflow-x:auto;margin-bottom:8px}
+  table{width:100%;border-collapse:collapse;font-size:.82rem}
+  th{color:var(--mut);font-weight:500;text-align:left;padding:8px 10px;border-bottom:1px solid var(--bor);font-size:.72rem;text-transform:uppercase;white-space:nowrap}
+  td{padding:8px 10px;border-bottom:1px solid var(--bor);white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:rgba(255,255,255,.03)}
+  .muted{color:var(--mut)}
+  .note{background:#1e293b;border:1px solid #334155;border-left:3px solid #f59e0b;border-radius:8px;padding:14px 18px;font-size:.82rem;color:#94a3b8;margin-bottom:8px;line-height:1.6}
+  .note b{color:#f1f5f9}
+  .foot{color:var(--mut);font-size:.73rem;margin-top:20px;text-align:center}
 </style>
 </head>
 <body>
 
 <h1>Salik Traffic Monitor</h1>
-<p class="subtitle">Updated: 14 Apr 2026 23:12 Dubai time &nbsp;·&nbsp; Auto-refreshes every 30 minutes &nbsp;·&nbsp; All 8 toll gates</p>
+<p class="sub">Updated: 14 Apr 2026 23:26 Dubai time &nbsp;·&nbsp; Auto-refreshes every 30 min &nbsp;·&nbsp; All 8 toll gates &nbsp;·&nbsp; 32 readings collected</p>
 
-<div class="stat-row">
-  <div class="stat-box">
-    <div class="val">AED 67,223</div>
-    <div class="lbl">Estimated network revenue / hr</div>
-  </div>
-  <div class="stat-box">
-    <div class="val">91%</div>
-    <div class="lbl">Average network speed vs free-flow</div>
-  </div>
-  <div class="stat-box">
-    <div class="val">8 / 8</div>
-    <div class="lbl">Gates with live data</div>
-  </div>
-  <div class="stat-box">
-    <div class="val">32</div>
-    <div class="lbl">Total readings collected</div>
-  </div>
+<!-- ── Top stats ─────────────────────────────────────────────────────────── -->
+<p class="sec">Network Snapshot (Current)</p>
+<div class="stats">
+  <div class="sbox"><div class="v">AED 67,223</div><div class="l">Estimated network revenue / hr right now</div></div>
+  <div class="sbox"><div class="v">91%</div><div class="l">Average network speed vs free-flow</div></div>
+  <div class="sbox"><div class="v">AED 134,279</div><div class="l">Average estimated revenue / day (observed days)</div></div>
+  <div class="sbox"><div class="v">AED 49.0M</div><div class="l">Annualised run rate (daily avg × 365)</div></div>
 </div>
 
-<p class="section-title">Live Gate Status</p>
+<!-- ── Gate cards ────────────────────────────────────────────────────────── -->
+<p class="sec">Live Gate Status</p>
 <div class="cards">
         <div class="card">
-            <div class="gate-name">Al Garhoud Bridge</div>
-            <div class="congestion-bar-wrap">
-                <div class="congestion-bar" style="width:100%;background:#22c55e"></div>
-            </div>
-            <div class="congestion-label" style="color:#22c55e">Free flow — 100% of free flow</div>
-            <div class="metrics">
-                <div class="metric"><span class="mval">84</span><span class="mlbl">km/h now</span></div>
-                <div class="metric"><span class="mval">84</span><span class="mlbl">km/h free flow</span></div>
-                <div class="metric"><span class="mval">2,400</span><span class="mlbl">veh/hr est.</span></div>
-                <div class="metric"><span class="mval">1,800</span><span class="mlbl">chargeable/hr</span></div>
-            </div>
-            <div class="revenue">AED 7,200 / hr &nbsp;<span class="tariff-badge">@ AED 4</span></div>
+          <div class="gate-name">Al Garhoud Bridge</div>
+          <div class="cbar-wrap"><div class="cbar" style="width:100%;background:#22c55e"></div></div>
+          <div class="clabel" style="color:#22c55e">Free flow — 100% of free flow</div>
+          <div class="metrics">
+            <div class="m"><span class="mv">84</span><span class="ml">km/h now</span></div>
+            <div class="m"><span class="mv">84</span><span class="ml">km/h free-flow</span></div>
+            <div class="m"><span class="mv">2,400</span><span class="ml">veh/hr est.</span></div>
+            <div class="m"><span class="mv">1,800</span><span class="ml">chargeable/hr</span></div>
+          </div>
+          <div class="rev">AED 7,200/hr <span class="tbadge">@ AED 4</span></div>
         </div>
         <div class="card">
-            <div class="gate-name">Al Maktoum Bridge</div>
-            <div class="congestion-bar-wrap">
-                <div class="congestion-bar" style="width:87%;background:#22c55e"></div>
-            </div>
-            <div class="congestion-label" style="color:#22c55e">Free flow — 87% of free flow</div>
-            <div class="metrics">
-                <div class="metric"><span class="mval">55</span><span class="mlbl">km/h now</span></div>
-                <div class="metric"><span class="mval">63</span><span class="mlbl">km/h free flow</span></div>
-                <div class="metric"><span class="mval">2,361</span><span class="mlbl">veh/hr est.</span></div>
-                <div class="metric"><span class="mval">1,771</span><span class="mlbl">chargeable/hr</span></div>
-            </div>
-            <div class="revenue">AED 7,084 / hr &nbsp;<span class="tariff-badge">@ AED 4</span></div>
+          <div class="gate-name">Al Maktoum Bridge</div>
+          <div class="cbar-wrap"><div class="cbar" style="width:87%;background:#22c55e"></div></div>
+          <div class="clabel" style="color:#22c55e">Free flow — 87% of free flow</div>
+          <div class="metrics">
+            <div class="m"><span class="mv">55</span><span class="ml">km/h now</span></div>
+            <div class="m"><span class="mv">63</span><span class="ml">km/h free-flow</span></div>
+            <div class="m"><span class="mv">2,361</span><span class="ml">veh/hr est.</span></div>
+            <div class="m"><span class="mv">1,771</span><span class="ml">chargeable/hr</span></div>
+          </div>
+          <div class="rev">AED 7,084/hr <span class="tbadge">@ AED 4</span></div>
         </div>
         <div class="card">
-            <div class="gate-name">Al Safa</div>
-            <div class="congestion-bar-wrap">
-                <div class="congestion-bar" style="width:100%;background:#22c55e"></div>
-            </div>
-            <div class="congestion-label" style="color:#22c55e">Free flow — 100% of free flow</div>
-            <div class="metrics">
-                <div class="metric"><span class="mval">67</span><span class="mlbl">km/h now</span></div>
-                <div class="metric"><span class="mval">67</span><span class="mlbl">km/h free flow</span></div>
-                <div class="metric"><span class="mval">3,600</span><span class="mlbl">veh/hr est.</span></div>
-                <div class="metric"><span class="mval">2,700</span><span class="mlbl">chargeable/hr</span></div>
-            </div>
-            <div class="revenue">AED 10,800 / hr &nbsp;<span class="tariff-badge">@ AED 4</span></div>
+          <div class="gate-name">Al Safa</div>
+          <div class="cbar-wrap"><div class="cbar" style="width:100%;background:#22c55e"></div></div>
+          <div class="clabel" style="color:#22c55e">Free flow — 100% of free flow</div>
+          <div class="metrics">
+            <div class="m"><span class="mv">67</span><span class="ml">km/h now</span></div>
+            <div class="m"><span class="mv">67</span><span class="ml">km/h free-flow</span></div>
+            <div class="m"><span class="mv">3,600</span><span class="ml">veh/hr est.</span></div>
+            <div class="m"><span class="mv">2,700</span><span class="ml">chargeable/hr</span></div>
+          </div>
+          <div class="rev">AED 10,800/hr <span class="tbadge">@ AED 4</span></div>
         </div>
         <div class="card">
-            <div class="gate-name">Al Barsha</div>
-            <div class="congestion-bar-wrap">
-                <div class="congestion-bar" style="width:76%;background:#f59e0b"></div>
-            </div>
-            <div class="congestion-label" style="color:#f59e0b">Moderate — 76% of free flow</div>
-            <div class="metrics">
-                <div class="metric"><span class="mval">29</span><span class="mlbl">km/h now</span></div>
-                <div class="metric"><span class="mval">38</span><span class="mlbl">km/h free flow</span></div>
-                <div class="metric"><span class="mval">3,398</span><span class="mlbl">veh/hr est.</span></div>
-                <div class="metric"><span class="mval">2,548</span><span class="mlbl">chargeable/hr</span></div>
-            </div>
-            <div class="revenue">AED 10,194 / hr &nbsp;<span class="tariff-badge">@ AED 4</span></div>
+          <div class="gate-name">Al Barsha</div>
+          <div class="cbar-wrap"><div class="cbar" style="width:76%;background:#f59e0b"></div></div>
+          <div class="clabel" style="color:#f59e0b">Moderate — 76% of free flow</div>
+          <div class="metrics">
+            <div class="m"><span class="mv">29</span><span class="ml">km/h now</span></div>
+            <div class="m"><span class="mv">38</span><span class="ml">km/h free-flow</span></div>
+            <div class="m"><span class="mv">3,398</span><span class="ml">veh/hr est.</span></div>
+            <div class="m"><span class="mv">2,548</span><span class="ml">chargeable/hr</span></div>
+          </div>
+          <div class="rev">AED 10,194/hr <span class="tbadge">@ AED 4</span></div>
         </div>
         <div class="card">
-            <div class="gate-name">Al Mamzar North</div>
-            <div class="congestion-bar-wrap">
-                <div class="congestion-bar" style="width:78%;background:#f59e0b"></div>
-            </div>
-            <div class="congestion-label" style="color:#f59e0b">Moderate — 78% of free flow</div>
-            <div class="metrics">
-                <div class="metric"><span class="mval">44</span><span class="mlbl">km/h now</span></div>
-                <div class="metric"><span class="mval">56</span><span class="mlbl">km/h free flow</span></div>
-                <div class="metric"><span class="mval">2,289</span><span class="mlbl">veh/hr est.</span></div>
-                <div class="metric"><span class="mval">1,717</span><span class="mlbl">chargeable/hr</span></div>
-            </div>
-            <div class="revenue">AED 6,869 / hr &nbsp;<span class="tariff-badge">@ AED 4</span></div>
+          <div class="gate-name">Al Mamzar North</div>
+          <div class="cbar-wrap"><div class="cbar" style="width:78%;background:#f59e0b"></div></div>
+          <div class="clabel" style="color:#f59e0b">Moderate — 78% of free flow</div>
+          <div class="metrics">
+            <div class="m"><span class="mv">44</span><span class="ml">km/h now</span></div>
+            <div class="m"><span class="mv">56</span><span class="ml">km/h free-flow</span></div>
+            <div class="m"><span class="mv">2,289</span><span class="ml">veh/hr est.</span></div>
+            <div class="m"><span class="mv">1,717</span><span class="ml">chargeable/hr</span></div>
+          </div>
+          <div class="rev">AED 6,869/hr <span class="tbadge">@ AED 4</span></div>
         </div>
         <div class="card">
-            <div class="gate-name">Al Mamzar South</div>
-            <div class="congestion-bar-wrap">
-                <div class="congestion-bar" style="width:88%;background:#22c55e"></div>
-            </div>
-            <div class="congestion-label" style="color:#22c55e">Free flow — 88% of free flow</div>
-            <div class="metrics">
-                <div class="metric"><span class="mval">55</span><span class="mlbl">km/h now</span></div>
-                <div class="metric"><span class="mval">62</span><span class="mlbl">km/h free flow</span></div>
-                <div class="metric"><span class="mval">2,369</span><span class="mlbl">veh/hr est.</span></div>
-                <div class="metric"><span class="mval">1,777</span><span class="mlbl">chargeable/hr</span></div>
-            </div>
-            <div class="revenue">AED 7,108 / hr &nbsp;<span class="tariff-badge">@ AED 4</span></div>
+          <div class="gate-name">Al Mamzar South</div>
+          <div class="cbar-wrap"><div class="cbar" style="width:88%;background:#22c55e"></div></div>
+          <div class="clabel" style="color:#22c55e">Free flow — 88% of free flow</div>
+          <div class="metrics">
+            <div class="m"><span class="mv">55</span><span class="ml">km/h now</span></div>
+            <div class="m"><span class="mv">62</span><span class="ml">km/h free-flow</span></div>
+            <div class="m"><span class="mv">2,369</span><span class="ml">veh/hr est.</span></div>
+            <div class="m"><span class="mv">1,777</span><span class="ml">chargeable/hr</span></div>
+          </div>
+          <div class="rev">AED 7,108/hr <span class="tbadge">@ AED 4</span></div>
         </div>
         <div class="card">
-            <div class="gate-name">Airport Tunnel</div>
-            <div class="congestion-bar-wrap">
-                <div class="congestion-bar" style="width:93%;background:#22c55e"></div>
-            </div>
-            <div class="congestion-label" style="color:#22c55e">Free flow — 93% of free flow</div>
-            <div class="metrics">
-                <div class="metric"><span class="mval">55</span><span class="mlbl">km/h now</span></div>
-                <div class="metric"><span class="mval">59</span><span class="mlbl">km/h free flow</span></div>
-                <div class="metric"><span class="mval">2,389</span><span class="mlbl">veh/hr est.</span></div>
-                <div class="metric"><span class="mval">1,791</span><span class="mlbl">chargeable/hr</span></div>
-            </div>
-            <div class="revenue">AED 7,167 / hr &nbsp;<span class="tariff-badge">@ AED 4</span></div>
+          <div class="gate-name">Airport Tunnel</div>
+          <div class="cbar-wrap"><div class="cbar" style="width:93%;background:#22c55e"></div></div>
+          <div class="clabel" style="color:#22c55e">Free flow — 93% of free flow</div>
+          <div class="metrics">
+            <div class="m"><span class="mv">55</span><span class="ml">km/h now</span></div>
+            <div class="m"><span class="mv">59</span><span class="ml">km/h free-flow</span></div>
+            <div class="m"><span class="mv">2,389</span><span class="ml">veh/hr est.</span></div>
+            <div class="m"><span class="mv">1,791</span><span class="ml">chargeable/hr</span></div>
+          </div>
+          <div class="rev">AED 7,167/hr <span class="tbadge">@ AED 4</span></div>
         </div>
         <div class="card">
-            <div class="gate-name">Jebel Ali</div>
-            <div class="congestion-bar-wrap">
-                <div class="congestion-bar" style="width:100%;background:#22c55e"></div>
-            </div>
-            <div class="congestion-label" style="color:#22c55e">Free flow — 100% of free flow</div>
-            <div class="metrics">
-                <div class="metric"><span class="mval">104</span><span class="mlbl">km/h now</span></div>
-                <div class="metric"><span class="mval">104</span><span class="mlbl">km/h free flow</span></div>
-                <div class="metric"><span class="mval">3,600</span><span class="mlbl">veh/hr est.</span></div>
-                <div class="metric"><span class="mval">2,700</span><span class="mlbl">chargeable/hr</span></div>
-            </div>
-            <div class="revenue">AED 10,800 / hr &nbsp;<span class="tariff-badge">@ AED 4</span></div>
+          <div class="gate-name">Jebel Ali</div>
+          <div class="cbar-wrap"><div class="cbar" style="width:100%;background:#22c55e"></div></div>
+          <div class="clabel" style="color:#22c55e">Free flow — 100% of free flow</div>
+          <div class="metrics">
+            <div class="m"><span class="mv">104</span><span class="ml">km/h now</span></div>
+            <div class="m"><span class="mv">104</span><span class="ml">km/h free-flow</span></div>
+            <div class="m"><span class="mv">3,600</span><span class="ml">veh/hr est.</span></div>
+            <div class="m"><span class="mv">2,700</span><span class="ml">chargeable/hr</span></div>
+          </div>
+          <div class="rev">AED 10,800/hr <span class="tbadge">@ AED 4</span></div>
         </div></div>
 
-<p class="section-title">Last 24 Hours — Congestion Ratio per Gate (%)</p>
-<div class="charts">
-  <div class="chart-box">
-    <canvas id="trendChart" height="200"></canvas>
-  </div>
-  <div class="chart-box">
-    <canvas id="revChart" height="200"></canvas>
-  </div>
+<!-- ── Annual revenue table ──────────────────────────────────────────────── -->
+<p class="sec">Annual Revenue Estimate vs Salik Reported (AED)</p>
+<div class="note">
+  <b>How this works:</b> For each 30-minute poll cycle, we sum the estimated revenue across all 8 gates
+  and multiply by 0.5 hr to get the revenue for that window. Summing all windows gives the
+  <b>Collected Period</b> figure. We then divide by observed days and multiply by 365 to get the
+  <b>Full-Year Extrapolation</b>. The <b>Salik Reported</b> column shows actual annual toll revenue
+  from their Annual Report — add those figures by updating <code>SALIK_REPORTED</code> in
+  <code>generate_dashboard.py</code> each year.
 </div>
-
-<p class="section-title">Latest Readings</p>
-<div class="table-wrap">
+<div class="twrap">
   <table>
     <thead><tr>
-      <th>Time (Dubai)</th><th>Gate</th><th>Speed km/h</th><th>Free-flow</th>
-      <th>Congestion</th><th>Flow vph</th><th>Tariff</th><th>Revenue / hr</th>
+      <th>FY</th><th>Our Data Coverage</th><th>Days Observed</th>
+      <th>Est. Revenue (Observed Period)</th><th>Daily Avg</th>
+      <th>Full-Year Extrapolation</th><th>Salik Reported Revenue</th><th>Variance</th>
     </tr></thead>
     <tbody>
         <tr>
-            <td>23:06</td>
-            <td>Al Garhoud Bridge</td>
-            <td>84</td>
-            <td>84</td>
-            <td style="color:#22c55e;font-weight:600">100%</td>
-            <td>2,400</td>
-            <td>AED 4</td>
-            <td>AED 7,200</td>
-        </tr>
-        <tr>
-            <td>23:06</td>
-            <td>Al Maktoum Bridge</td>
-            <td>55</td>
-            <td>63</td>
-            <td style="color:#22c55e;font-weight:600">87%</td>
-            <td>2,361</td>
-            <td>AED 4</td>
-            <td>AED 7,084</td>
-        </tr>
-        <tr>
-            <td>23:06</td>
-            <td>Al Safa</td>
-            <td>67</td>
-            <td>67</td>
-            <td style="color:#22c55e;font-weight:600">100%</td>
-            <td>3,600</td>
-            <td>AED 4</td>
-            <td>AED 10,800</td>
-        </tr>
-        <tr>
-            <td>23:06</td>
-            <td>Al Barsha</td>
-            <td>29</td>
-            <td>38</td>
-            <td style="color:#f59e0b;font-weight:600">76%</td>
-            <td>3,398</td>
-            <td>AED 4</td>
-            <td>AED 10,194</td>
-        </tr>
-        <tr>
-            <td>23:06</td>
-            <td>Al Mamzar North</td>
-            <td>44</td>
-            <td>56</td>
-            <td style="color:#f59e0b;font-weight:600">78%</td>
-            <td>2,289</td>
-            <td>AED 4</td>
-            <td>AED 6,869</td>
-        </tr>
-        <tr>
-            <td>23:06</td>
-            <td>Al Mamzar South</td>
-            <td>55</td>
-            <td>61</td>
-            <td style="color:#22c55e;font-weight:600">90%</td>
-            <td>2,376</td>
-            <td>AED 4</td>
-            <td>AED 7,130</td>
-        </tr>
-        <tr>
-            <td>23:06</td>
-            <td>Airport Tunnel</td>
-            <td>55</td>
-            <td>60</td>
-            <td style="color:#22c55e;font-weight:600">91%</td>
-            <td>2,383</td>
-            <td>AED 4</td>
-            <td>AED 7,150</td>
-        </tr>
-        <tr>
-            <td>23:06</td>
-            <td>Jebel Ali</td>
-            <td>104</td>
-            <td>104</td>
-            <td style="color:#22c55e;font-weight:600">100%</td>
-            <td>3,600</td>
-            <td>AED 4</td>
-            <td>AED 10,800</td>
-        </tr>
-        <tr>
-            <td>23:07</td>
-            <td>Al Garhoud Bridge</td>
-            <td>84</td>
-            <td>84</td>
-            <td style="color:#22c55e;font-weight:600">100%</td>
-            <td>2,400</td>
-            <td>AED 4</td>
-            <td>AED 7,200</td>
-        </tr>
-        <tr>
-            <td>23:07</td>
-            <td>Al Maktoum Bridge</td>
-            <td>55</td>
-            <td>63</td>
-            <td style="color:#22c55e;font-weight:600">87%</td>
-            <td>2,361</td>
-            <td>AED 4</td>
-            <td>AED 7,084</td>
-        </tr>
-        <tr>
-            <td>23:07</td>
-            <td>Al Safa</td>
-            <td>67</td>
-            <td>67</td>
-            <td style="color:#22c55e;font-weight:600">100%</td>
-            <td>3,600</td>
-            <td>AED 4</td>
-            <td>AED 10,800</td>
-        </tr>
-        <tr>
-            <td>23:07</td>
-            <td>Al Barsha</td>
-            <td>29</td>
-            <td>38</td>
-            <td style="color:#f59e0b;font-weight:600">76%</td>
-            <td>3,398</td>
-            <td>AED 4</td>
-            <td>AED 10,194</td>
-        </tr>
-        <tr>
-            <td>23:07</td>
-            <td>Al Mamzar North</td>
-            <td>44</td>
-            <td>56</td>
-            <td style="color:#f59e0b;font-weight:600">78%</td>
-            <td>2,289</td>
-            <td>AED 4</td>
-            <td>AED 6,869</td>
-        </tr>
-        <tr>
-            <td>23:07</td>
-            <td>Al Mamzar South</td>
-            <td>55</td>
-            <td>62</td>
-            <td style="color:#22c55e;font-weight:600">88%</td>
-            <td>2,369</td>
-            <td>AED 4</td>
-            <td>AED 7,108</td>
-        </tr>
-        <tr>
-            <td>23:07</td>
-            <td>Airport Tunnel</td>
-            <td>55</td>
-            <td>59</td>
-            <td style="color:#22c55e;font-weight:600">93%</td>
-            <td>2,389</td>
-            <td>AED 4</td>
-            <td>AED 7,167</td>
-        </tr>
-        <tr>
-            <td>23:07</td>
-            <td>Jebel Ali</td>
-            <td>104</td>
-            <td>104</td>
-            <td style="color:#22c55e;font-weight:600">100%</td>
-            <td>3,600</td>
-            <td>AED 4</td>
-            <td>AED 10,800</td>
+          <td><b>2026</b> 🔴 in progress</td>
+          <td class="muted">2026-04-14 → 2026-04-14</td>
+          <td>1 / 365 days</td>
+          <td>AED 134,279</td>
+          <td>AED 134,279/day</td>
+          <td><b>AED 49.0M</b></td>
+          <td><span class="muted">Update from Annual Report</span></td>
+          <td><span class="muted">—</span></td>
         </tr></tbody>
   </table>
 </div>
 
-<p class="refresh-note">
-  This page is regenerated automatically after every data collection run (~every 30 min).
-  Hard-refresh your browser (Ctrl+Shift+R) to see the latest update.
+<!-- ── Cumulative stats ──────────────────────────────────────────────────── -->
+<p class="sec">Cumulative Since Collection Began</p>
+<div class="stats">
+  <div class="sbox"><div class="v">AED 134,279</div><div class="l">Total estimated revenue — all observed windows</div></div>
+  <div class="sbox"><div class="v">1</div><div class="l">Calendar days with live data</div></div>
+  <div class="sbox"><div class="v">4</div><div class="l">30-min poll cycles with real readings</div></div>
+  <div class="sbox"><div class="v">32</div><div class="l">Individual gate readings stored</div></div>
+</div>
+
+<!-- ── Daily revenue chart ───────────────────────────────────────────────── -->
+<p class="sec">Daily Estimated Revenue — Last 60 Days (AED)</p>
+<div class="charts1"><div class="cbox" style="height:220px">
+  <canvas id="dailyChart"></canvas>
+</div></div>
+
+<!-- ── 24h congestion + current revenue ─────────────────────────────────── -->
+<p class="sec">Last 24 Hours — Congestion Ratio per Gate (%)</p>
+<div class="charts2">
+  <div class="cbox"><canvas id="trendChart" height="220"></canvas></div>
+  <div class="cbox"><canvas id="revChart"   height="220"></canvas></div>
+</div>
+
+<!-- ── Latest readings table ────────────────────────────────────────────── -->
+<p class="sec">Latest Readings</p>
+<div class="twrap">
+  <table>
+    <thead><tr>
+      <th>Time (Dubai)</th><th>Gate</th><th>Speed km/h</th><th>Free-flow</th>
+      <th>Congestion</th><th>Flow vph</th><th>Tariff</th><th>Revenue/hr</th>
+    </tr></thead>
+    <tbody><tr>
+          <td>23:06</td>
+          <td>Al Garhoud Bridge</td>
+          <td>84</td>
+          <td>84</td>
+          <td style="color:#22c55e;font-weight:600">100%</td>
+          <td>2,400</td>
+          <td>AED 4</td>
+          <td>AED 7,200</td>
+        </tr><tr>
+          <td>23:06</td>
+          <td>Al Maktoum Bridge</td>
+          <td>55</td>
+          <td>63</td>
+          <td style="color:#22c55e;font-weight:600">87%</td>
+          <td>2,361</td>
+          <td>AED 4</td>
+          <td>AED 7,084</td>
+        </tr><tr>
+          <td>23:06</td>
+          <td>Al Safa</td>
+          <td>67</td>
+          <td>67</td>
+          <td style="color:#22c55e;font-weight:600">100%</td>
+          <td>3,600</td>
+          <td>AED 4</td>
+          <td>AED 10,800</td>
+        </tr><tr>
+          <td>23:06</td>
+          <td>Al Barsha</td>
+          <td>29</td>
+          <td>38</td>
+          <td style="color:#f59e0b;font-weight:600">76%</td>
+          <td>3,398</td>
+          <td>AED 4</td>
+          <td>AED 10,194</td>
+        </tr><tr>
+          <td>23:06</td>
+          <td>Al Mamzar North</td>
+          <td>44</td>
+          <td>56</td>
+          <td style="color:#f59e0b;font-weight:600">78%</td>
+          <td>2,289</td>
+          <td>AED 4</td>
+          <td>AED 6,869</td>
+        </tr><tr>
+          <td>23:06</td>
+          <td>Al Mamzar South</td>
+          <td>55</td>
+          <td>61</td>
+          <td style="color:#22c55e;font-weight:600">90%</td>
+          <td>2,376</td>
+          <td>AED 4</td>
+          <td>AED 7,130</td>
+        </tr><tr>
+          <td>23:06</td>
+          <td>Airport Tunnel</td>
+          <td>55</td>
+          <td>60</td>
+          <td style="color:#22c55e;font-weight:600">91%</td>
+          <td>2,383</td>
+          <td>AED 4</td>
+          <td>AED 7,150</td>
+        </tr><tr>
+          <td>23:06</td>
+          <td>Jebel Ali</td>
+          <td>104</td>
+          <td>104</td>
+          <td style="color:#22c55e;font-weight:600">100%</td>
+          <td>3,600</td>
+          <td>AED 4</td>
+          <td>AED 10,800</td>
+        </tr><tr>
+          <td>23:07</td>
+          <td>Al Garhoud Bridge</td>
+          <td>84</td>
+          <td>84</td>
+          <td style="color:#22c55e;font-weight:600">100%</td>
+          <td>2,400</td>
+          <td>AED 4</td>
+          <td>AED 7,200</td>
+        </tr><tr>
+          <td>23:07</td>
+          <td>Al Maktoum Bridge</td>
+          <td>55</td>
+          <td>63</td>
+          <td style="color:#22c55e;font-weight:600">87%</td>
+          <td>2,361</td>
+          <td>AED 4</td>
+          <td>AED 7,084</td>
+        </tr><tr>
+          <td>23:07</td>
+          <td>Al Safa</td>
+          <td>67</td>
+          <td>67</td>
+          <td style="color:#22c55e;font-weight:600">100%</td>
+          <td>3,600</td>
+          <td>AED 4</td>
+          <td>AED 10,800</td>
+        </tr><tr>
+          <td>23:07</td>
+          <td>Al Barsha</td>
+          <td>29</td>
+          <td>38</td>
+          <td style="color:#f59e0b;font-weight:600">76%</td>
+          <td>3,398</td>
+          <td>AED 4</td>
+          <td>AED 10,194</td>
+        </tr><tr>
+          <td>23:07</td>
+          <td>Al Mamzar North</td>
+          <td>44</td>
+          <td>56</td>
+          <td style="color:#f59e0b;font-weight:600">78%</td>
+          <td>2,289</td>
+          <td>AED 4</td>
+          <td>AED 6,869</td>
+        </tr><tr>
+          <td>23:07</td>
+          <td>Al Mamzar South</td>
+          <td>55</td>
+          <td>62</td>
+          <td style="color:#22c55e;font-weight:600">88%</td>
+          <td>2,369</td>
+          <td>AED 4</td>
+          <td>AED 7,108</td>
+        </tr><tr>
+          <td>23:07</td>
+          <td>Airport Tunnel</td>
+          <td>55</td>
+          <td>59</td>
+          <td style="color:#22c55e;font-weight:600">93%</td>
+          <td>2,389</td>
+          <td>AED 4</td>
+          <td>AED 7,167</td>
+        </tr><tr>
+          <td>23:07</td>
+          <td>Jebel Ali</td>
+          <td>104</td>
+          <td>104</td>
+          <td style="color:#22c55e;font-weight:600">100%</td>
+          <td>3,600</td>
+          <td>AED 4</td>
+          <td>AED 10,800</td>
+        </tr></tbody>
+  </table>
+</div>
+
+<p class="foot">
+  Collection runs every 30 min (Dubai 06:00–01:00) via GitHub Actions · TomTom Traffic Flow API ·
+  Greenshields model · 75% chargeability assumption · For research purposes only
 </p>
 
 <script>
-const trendCtx = document.getElementById('trendChart').getContext('2d');
-new Chart(trendCtx, {
-  type: 'line',
-  data: {
-    labels: ["22:56", "23:01", "23:06", "23:07"],
-    datasets: [{"label": "Al Garhoud Bridge", "data": [100.0, 100.0, 100.0, 100.0], "borderColor": "#6366f1", "backgroundColor": "#6366f122", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Maktoum Bridge", "data": [87.3, 90.6, 87.3, 87.3], "borderColor": "#22c55e", "backgroundColor": "#22c55e22", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Safa", "data": [100.0, 100.0, 100.0, 100.0], "borderColor": "#f59e0b", "backgroundColor": "#f59e0b22", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Barsha", "data": [72.2, 76.3, 76.3, 76.3], "borderColor": "#ef4444", "backgroundColor": "#ef444422", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Mamzar North", "data": [74.6, 80.0, 78.6, 78.6], "borderColor": "#3b82f6", "backgroundColor": "#3b82f622", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Mamzar South", "data": [86.9, 88.5, 90.2, 88.7], "borderColor": "#ec4899", "backgroundColor": "#ec489922", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Airport Tunnel", "data": [91.5, 91.7, 91.7, 93.2], "borderColor": "#14b8a6", "backgroundColor": "#14b8a622", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Jebel Ali", "data": [100.0, 100.0, 100.0, 100.0], "borderColor": "#f97316", "backgroundColor": "#f9731622", "tension": 0.3, "spanGaps": true, "pointRadius": 2}]
+const chtDefaults = {
+  responsive:true, maintainAspectRatio:false,
+  plugins:{legend:{labels:{color:'#94a3b8',boxWidth:11,font:{size:10}}}},
+  scales:{
+    x:{ticks:{color:'#94a3b8',maxTicksLimit:10,font:{size:10}},grid:{color:'#1e293b'}},
+    y:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'#334155'}}
+  }
+};
+
+// Daily revenue bar chart
+new Chart(document.getElementById('dailyChart').getContext('2d'),{
+  type:'bar',
+  data:{
+    labels:["2026-04-14"],
+    datasets:[{
+      label:'Est. daily revenue (AED)',
+      data:[134279.0],
+      backgroundColor:'#6366f133',
+      borderColor:'#6366f1',
+      borderWidth:1,
+    }]
   },
-  options: {
-    responsive: true,
-    plugins: { legend: { labels: { color: '#94a3b8', boxWidth: 12, font: { size: 11 } } } },
-    scales: {
-      x: { ticks: { color: '#94a3b8', maxTicksLimit: 12, font: { size: 10 } }, grid: { color: '#1e293b' } },
-      y: { min: 0, max: 100, ticks: { color: '#94a3b8', callback: v => v+'%' }, grid: { color: '#334155' } }
+  options:{...chtDefaults,
+    scales:{
+      x:{ticks:{color:'#94a3b8',maxTicksLimit:15,font:{size:9}},grid:{color:'#1e293b'}},
+      y:{ticks:{color:'#94a3b8',font:{size:10},callback:v=>'AED '+v.toLocaleString()},grid:{color:'#334155'}}
     }
   }
 });
 
-const revCtx = document.getElementById('revChart').getContext('2d');
-new Chart(revCtx, {
-  type: 'bar',
-  data: {
-    labels: ["Bridge", "Bridge", "Safa", "Barsha", "North", "South", "Tunnel", "Ali"],
-    datasets: [{
-      label: 'AED / hr',
-      data: [7200.0, 7084.0, 10800.0, 10194.0, 6869.0, 7108.0, 7167.0, 10800.0],
-      backgroundColor: ['#6366f1','#22c55e','#f59e0b','#ef4444','#3b82f6','#ec4899','#14b8a6','#f97316'],
+// 24h congestion trend
+new Chart(document.getElementById('trendChart').getContext('2d'),{
+  type:'line',
+  data:{
+    labels:["22:56", "23:01", "23:06", "23:07"],
+    datasets:[{"label": "Al Garhoud Bridge", "data": [100.0, 100.0, 100.0, 100.0], "borderColor": "#6366f1", "backgroundColor": "#6366f122", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Maktoum Bridge", "data": [87.3, 90.6, 87.3, 87.3], "borderColor": "#22c55e", "backgroundColor": "#22c55e22", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Safa", "data": [100.0, 100.0, 100.0, 100.0], "borderColor": "#f59e0b", "backgroundColor": "#f59e0b22", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Barsha", "data": [72.2, 76.3, 76.3, 76.3], "borderColor": "#ef4444", "backgroundColor": "#ef444422", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Mamzar North", "data": [74.6, 80.0, 78.6, 78.6], "borderColor": "#3b82f6", "backgroundColor": "#3b82f622", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Mamzar South", "data": [86.9, 88.5, 90.2, 88.7], "borderColor": "#ec4899", "backgroundColor": "#ec489922", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Airport Tunnel", "data": [91.5, 91.7, 91.7, 93.2], "borderColor": "#14b8a6", "backgroundColor": "#14b8a622", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Jebel Ali", "data": [100.0, 100.0, 100.0, 100.0], "borderColor": "#f97316", "backgroundColor": "#f9731622", "tension": 0.3, "spanGaps": true, "pointRadius": 2}]
+  },
+  options:{...chtDefaults,
+    scales:{
+      x:{ticks:{color:'#94a3b8',maxTicksLimit:12,font:{size:10}},grid:{color:'#1e293b'}},
+      y:{min:0,max:100,ticks:{color:'#94a3b8',callback:v=>v+'%'},grid:{color:'#334155'}}
+    }
+  }
+});
+
+// Current revenue per gate
+new Chart(document.getElementById('revChart').getContext('2d'),{
+  type:'bar',
+  data:{
+    labels:["Bridge", "Bridge", "Safa", "Barsha", "North", "South", "Tunnel", "Ali"],
+    datasets:[{
+      label:'AED/hr',
+      data:[7200.0, 7084.0, 10800.0, 10194.0, 6869.0, 7108.0, 7167.0, 10800.0],
+      backgroundColor:["#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#3b82f6", "#ec4899", "#14b8a6", "#f97316"],
     }]
   },
-  options: {
-    responsive: true,
-    plugins: { legend: { display: false } },
-    scales: {
-      x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } },
-      y: { ticks: { color: '#94a3b8', callback: v => 'AED '+v.toLocaleString() }, grid: { color: '#334155' } }
+  options:{...chtDefaults,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'#1e293b'}},
+      y:{ticks:{color:'#94a3b8',callback:v=>'AED '+v.toLocaleString()},grid:{color:'#334155'}}
     }
   }
 });
