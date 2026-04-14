@@ -99,14 +99,17 @@ def build_revenue_timeseries(rows):
 def annual_revenue_table(revenue_ts, rows):
     """
     Returns list of dicts, one per year, with:
-      - year, first_date, last_date
-      - collected_aed  : sum of 30-min intervals we actually measured
-      - poll_days      : distinct calendar days in our data for that year
-      - daily_avg_aed  : collected_aed / poll_days
-      - fy_days        : total days in that FY (Jan 1 – Dec 31)
-      - extrapolated_aed: daily_avg × fy_days  (full-year estimate)
-      - salik_reported : from SALIK_REPORTED dict (AED million → AED)
+      - year, first_date, last_date, fy_end_date
+      - collected_aed   : sum of 30-min intervals actually measured
+      - poll_days       : distinct calendar days in our data for that year
+      - daily_avg_aed   : collected_aed / poll_days
+      - fy_days         : total days in that FY (Jan 1 – Dec 31)
+      - days_remaining  : FY days still to run from today (0 if year complete)
+      - extrapolated_aed: daily_avg × fy_days (full FY, not partial)
+      - salik_reported  : from SALIK_REPORTED dict (AED million → AED)
     """
+    today = datetime.now(DUBAI_TZ).date()
+
     # Bucket revenue into years
     by_year = defaultdict(float)
     dates_by_year = defaultdict(set)
@@ -117,16 +120,18 @@ def annual_revenue_table(revenue_ts, rows):
 
     result = []
     for year in sorted(by_year.keys()):
-        poll_days = len(dates_by_year[year])
-        collected = by_year[year]
-        daily_avg = collected / poll_days if poll_days else 0
-        fy_start  = datetime(int(year), 1,  1)
-        fy_end    = datetime(int(year), 12, 31)
-        fy_days   = (fy_end - fy_start).days + 1
-        extrap    = daily_avg * fy_days
+        poll_days  = len(dates_by_year[year])
+        collected  = by_year[year]
+        daily_avg  = collected / poll_days if poll_days else 0
+        fy_start   = datetime(int(year), 1,  1).date()
+        fy_end     = datetime(int(year), 12, 31).date()
+        fy_days    = (fy_end - fy_start).days + 1
+        # Days remaining in FY from today (0 if the year has already closed)
+        days_remaining = max((fy_end - today).days + 1, 0)
+        extrap     = daily_avg * fy_days   # full FY estimate regardless of coverage
 
         # Date range string
-        year_rows = [r for r in rows if r["timestamp"][:4] == year]
+        year_rows  = [r for r in rows if r["timestamp"][:4] == year]
         first_date = min(r["timestamp"][:10] for r in year_rows)
         last_date  = max(r["timestamp"][:10] for r in year_rows)
 
@@ -135,16 +140,18 @@ def annual_revenue_table(revenue_ts, rows):
         variance   = ((extrap / reported) - 1) * 100 if reported else None
 
         result.append({
-            "year": year,
-            "first_date": first_date,
+            "year":            year,
+            "first_date":      first_date,
+            "fy_end_date":     fy_end.strftime("%d %b %Y"),
+            "days_remaining":  days_remaining,
             "last_date": last_date,
-            "poll_days": poll_days,
-            "collected_aed": collected,
-            "daily_avg_aed": daily_avg,
-            "fy_days": fy_days,
+            "poll_days":        poll_days,
+            "collected_aed":    collected,
+            "daily_avg_aed":    daily_avg,
+            "fy_days":          fy_days,
             "extrapolated_aed": extrap,
-            "salik_reported": reported,
-            "variance_pct": variance,
+            "salik_reported":   reported,
+            "variance_pct":     variance,
         })
     return result
 
@@ -210,19 +217,28 @@ def annual_table_html(annual):
     now_year = str(datetime.now(DUBAI_TZ).year)
     rows_html = ""
     for y in annual:
-        yr    = y["year"]
-        tag   = " 🔴 in progress" if yr == now_year else ""
-        rep   = fmt_aed(y["salik_reported"]) if y["salik_reported"] else '<span class="muted">Update from Annual Report</span>'
-        var   = f'<span style="color:{"#22c55e" if (y["variance_pct"] or 0)>=0 else "#ef4444"}">{y["variance_pct"]:+.1f}%</span>' \
-                if y["variance_pct"] is not None else '<span class="muted">—</span>'
+        yr       = y["year"]
+        is_live  = yr == now_year
+        status   = '<span style="color:#f59e0b;font-size:.75rem"> ● In progress</span>' if is_live \
+                   else '<span style="color:#22c55e;font-size:.75rem"> ✓ Complete</span>'
+        fy_end   = y["fy_end_date"]   # "31 Dec 2026"
+        rem      = f'<span class="muted">{y["days_remaining"]} days left in FY</span>' \
+                   if is_live and y["days_remaining"] > 0 else ""
+        coverage = f'{y["poll_days"]} days observed'
+        rep      = fmt_aed(y["salik_reported"]) if y["salik_reported"] \
+                   else '<span class="muted">Update from Annual Report</span>'
+        var      = f'<span style="color:{"#22c55e" if (y["variance_pct"] or 0) >= 0 else "#ef4444"}">' \
+                   f'{y["variance_pct"]:+.1f}%</span>' \
+                   if y["variance_pct"] is not None else '<span class="muted">—</span>'
         rows_html += f"""
         <tr>
-          <td><b>{yr}</b>{tag}</td>
+          <td><b>{yr}</b>{status}</td>
           <td class="muted">{y['first_date']} → {y['last_date']}</td>
-          <td>{y['poll_days']} / {y['fy_days']} days</td>
+          <td>31 Dec {yr} &nbsp;{rem}</td>
+          <td class="muted">{coverage}</td>
           <td>{fmt_aed(y['collected_aed'])}</td>
           <td>{fmt_aed(y['daily_avg_aed'])}/day</td>
-          <td><b>{fmt_aed(y['extrapolated_aed'])}</b></td>
+          <td><b>{fmt_aed(y['extrapolated_aed'])}</b><br><span class="muted" style="font-size:.72rem">daily avg × {y['fy_days']} FY days</span></td>
           <td>{rep}</td>
           <td>{var}</td>
         </tr>"""
@@ -382,8 +398,8 @@ def generate(rows):
 <div class="twrap">
   <table>
     <thead><tr>
-      <th>FY</th><th>Our Data Coverage</th><th>Days Observed</th>
-      <th>Est. Revenue (Observed Period)</th><th>Daily Avg</th>
+      <th>FY</th><th>Our Data Window</th><th>FY End Date</th><th>Coverage</th>
+      <th>Est. Revenue (Observed)</th><th>Daily Avg</th>
       <th>Full-Year Extrapolation</th><th>Salik Reported Revenue</th><th>Variance</th>
     </tr></thead>
     <tbody>{ann_rows_html}</tbody>
@@ -397,6 +413,7 @@ def generate(rows):
   <div class="sbox"><div class="v">{total_poll_days}</div><div class="l">Calendar days with live data</div></div>
   <div class="sbox"><div class="v">{len(rev_ts):,}</div><div class="l">30-min poll cycles with real readings</div></div>
   <div class="sbox"><div class="v">{len(rows):,}</div><div class="l">Individual gate readings stored</div></div>
+  <div class="sbox"><div class="v" style="color:#22c55e">304 / 2,500</div><div class="l">TomTom API calls per day (12% of free tier · resets midnight UTC)</div></div>
 </div>
 
 <!-- ── Daily revenue chart ───────────────────────────────────────────────── -->

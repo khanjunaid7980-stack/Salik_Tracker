@@ -53,7 +53,7 @@
 <body>
 
 <h1>Salik Traffic Monitor</h1>
-<p class="sub">Updated: 14 Apr 2026 23:26 Dubai time &nbsp;·&nbsp; Auto-refreshes every 30 min &nbsp;·&nbsp; All 8 toll gates &nbsp;·&nbsp; 32 readings collected</p>
+<p class="sub">Updated: 14 Apr 2026 23:36 Dubai time &nbsp;·&nbsp; Auto-refreshes every 30 min &nbsp;·&nbsp; All 8 toll gates &nbsp;·&nbsp; 32 readings collected</p>
 
 <!-- ── Top stats ─────────────────────────────────────────────────────────── -->
 <p class="sec">Network Snapshot (Current)</p>
@@ -177,18 +177,19 @@
 <div class="twrap">
   <table>
     <thead><tr>
-      <th>FY</th><th>Our Data Coverage</th><th>Days Observed</th>
-      <th>Est. Revenue (Observed Period)</th><th>Daily Avg</th>
+      <th>FY</th><th>Our Data Window</th><th>FY End Date</th><th>Coverage</th>
+      <th>Est. Revenue (Observed)</th><th>Daily Avg</th>
       <th>Full-Year Extrapolation</th><th>Salik Reported Revenue</th><th>Variance</th>
     </tr></thead>
     <tbody>
         <tr>
-          <td><b>2026</b> 🔴 in progress</td>
+          <td><b>2026</b><span style="color:#f59e0b;font-size:.75rem"> ● In progress</span></td>
           <td class="muted">2026-04-14 → 2026-04-14</td>
-          <td>1 / 365 days</td>
+          <td>31 Dec 2026 &nbsp;<span class="muted">262 days left in FY</span></td>
+          <td class="muted">1 days observed</td>
           <td>AED 134,279</td>
           <td>AED 134,279/day</td>
-          <td><b>AED 49.0M</b></td>
+          <td><b>AED 49.0M</b><br><span class="muted" style="font-size:.72rem">daily avg × 365 FY days</span></td>
           <td><span class="muted">Update from Annual Report</span></td>
           <td><span class="muted">—</span></td>
         </tr></tbody>
@@ -202,6 +203,7 @@
   <div class="sbox"><div class="v">1</div><div class="l">Calendar days with live data</div></div>
   <div class="sbox"><div class="v">4</div><div class="l">30-min poll cycles with real readings</div></div>
   <div class="sbox"><div class="v">32</div><div class="l">Individual gate readings stored</div></div>
+  <div class="sbox"><div class="v" style="color:#22c55e">304 / 2,500</div><div class="l">TomTom API calls per day (12% of free tier · resets midnight UTC)</div></div>
 </div>
 
 <!-- ── Daily revenue chart ───────────────────────────────────────────────── -->
