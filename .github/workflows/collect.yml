@@ -44,11 +44,11 @@ jobs:
           git add data/traffic_log.csv
           # Only commit if there are staged changes
           git diff --cached --quiet || git commit -m "chore: update traffic log $(date -u +%Y-%m-%dT%H:%MZ)"
-          # Retry push up to 3 times. On conflict, merge with the union
-          # strategy which includes all appended rows from both sides —
-          # safe for an append-only CSV log.
+          # Retry push up to 3 times. On conflict, pull the remote rows
+          # (standard merge) then push again. Safe for an append-only CSV
+          # because git's default merge handles non-overlapping appends.
           for i in 1 2 3; do
             git push && break
-            echo "Push attempt $i failed — pulling with union merge and retrying..."
-            git pull --no-rebase -X union origin claude/salik-traffic-data-system-nODtX
+            echo "Push attempt $i failed — pulling and retrying..."
+            git pull --no-rebase origin claude/salik-traffic-data-system-nODtX
           done
