@@ -19,6 +19,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Pull latest CSV before collecting
+        # Ensures we always append to the most recent version of the log,
+        # minimising the conflict window to just the push step.
+        run: git pull origin claude/salik-traffic-data-system-nODtX
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -37,7 +42,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/traffic_log.csv
-          # Only commit if there are staged changes (skip no-op runs)
+          # Only commit if there are staged changes
           git diff --cached --quiet || git commit -m "chore: update traffic log $(date -u +%Y-%m-%dT%H:%MZ)"
-          git pull --rebase origin claude/salik-traffic-data-system-nODtX
-          git push
+          # Retry push up to 3 times. On conflict, merge with the union
+          # strategy which includes all appended rows from both sides —
+          # safe for an append-only CSV log.
+          for i in 1 2 3; do
+            git push && break
+            echo "Push attempt $i failed — pulling with union merge and retrying..."
+            git pull --no-rebase -X union origin claude/salik-traffic-data-system-nODtX
+          done
