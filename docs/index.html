@@ -53,7 +53,7 @@
 <body>
 
 <h1>Salik Traffic Monitor</h1>
-<p class="sub">Updated: 06 Aug 2026 18:42 Dubai time &nbsp;·&nbsp; Auto-refreshes every 30 min &nbsp;·&nbsp; All 8 toll gates &nbsp;·&nbsp; 7,960 readings collected</p>
+<p class="sub">Updated: 07 Aug 2026 04:20 Dubai time &nbsp;·&nbsp; Auto-refreshes every 30 min &nbsp;·&nbsp; All 8 toll gates &nbsp;·&nbsp; 7,960 readings collected</p>
 
 <!-- ── Top stats ─────────────────────────────────────────────────────────── -->
 <p class="sec">Network Snapshot (Current)</p>
@@ -185,7 +185,7 @@
         <tr>
           <td><b>2026</b><span style="color:#f59e0b;font-size:.75rem"> ● In progress</span></td>
           <td class="muted">2026-04-14 → 2026-08-06</td>
-          <td>31 Dec 2026 &nbsp;<span class="muted">148 days left in FY</span></td>
+          <td>31 Dec 2026 &nbsp;<span class="muted">147 days left in FY</span></td>
           <td class="muted">115 days observed</td>
           <td>AED 37.6M</td>
           <td>AED 326,536/day</td>
@@ -415,8 +415,8 @@ new Chart(document.getElementById('dailyChart').getContext('2d'),{
 new Chart(document.getElementById('trendChart').getContext('2d'),{
   type:'line',
   data:{
-    labels:["20:25", "21:59", "23:37", "00:56", "08:55", "11:32", "14:27", "16:24", "18:42"],
-    datasets:[{"label": "Al Garhoud Bridge", "data": [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 43.0, 100.0, 56.6], "borderColor": "#6366f1", "backgroundColor": "#6366f122", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Maktoum Bridge", "data": [91.9, 91.9, 91.9, 98.4, 98.4, 98.4, 88.7, 85.5, 95.2], "borderColor": "#22c55e", "backgroundColor": "#22c55e22", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Safa", "data": [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0], "borderColor": "#f59e0b", "backgroundColor": "#f59e0b22", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Barsha", "data": [76.5, 74.3, 80.0, 100.0, 82.3, 100.0, 83.3, 82.9, 82.9], "borderColor": "#ef4444", "backgroundColor": "#ef444422", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Mamzar North", "data": [76.8, 73.7, 83.6, 76.4, 73.2, 70.9, 76.4, 71.4, 67.9], "borderColor": "#3b82f6", "backgroundColor": "#3b82f622", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Mamzar South", "data": [77.0, 79.7, 90.0, 91.7, 77.0, 86.9, 85.2, 83.6, 75.4], "borderColor": "#ec4899", "backgroundColor": "#ec489922", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Airport Tunnel", "data": [85.0, 91.7, 91.7, 100.0, 83.3, 90.0, 88.1, 90.0, 73.8], "borderColor": "#14b8a6", "backgroundColor": "#14b8a622", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Jebel Ali", "data": [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0], "borderColor": "#f97316", "backgroundColor": "#f9731622", "tension": 0.3, "spanGaps": true, "pointRadius": 2}]
+    labels:["08:55", "11:32", "14:27", "16:24", "18:42"],
+    datasets:[{"label": "Al Garhoud Bridge", "data": [100.0, 100.0, 43.0, 100.0, 56.6], "borderColor": "#6366f1", "backgroundColor": "#6366f122", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Maktoum Bridge", "data": [98.4, 98.4, 88.7, 85.5, 95.2], "borderColor": "#22c55e", "backgroundColor": "#22c55e22", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Safa", "data": [100.0, 100.0, 100.0, 100.0, 100.0], "borderColor": "#f59e0b", "backgroundColor": "#f59e0b22", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Barsha", "data": [82.3, 100.0, 83.3, 82.9, 82.9], "borderColor": "#ef4444", "backgroundColor": "#ef444422", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Mamzar North", "data": [73.2, 70.9, 76.4, 71.4, 67.9], "borderColor": "#3b82f6", "backgroundColor": "#3b82f622", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Al Mamzar South", "data": [77.0, 86.9, 85.2, 83.6, 75.4], "borderColor": "#ec4899", "backgroundColor": "#ec489922", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Airport Tunnel", "data": [83.3, 90.0, 88.1, 90.0, 73.8], "borderColor": "#14b8a6", "backgroundColor": "#14b8a622", "tension": 0.3, "spanGaps": true, "pointRadius": 2}, {"label": "Jebel Ali", "data": [100.0, 100.0, 100.0, 100.0, 100.0], "borderColor": "#f97316", "backgroundColor": "#f9731622", "tension": 0.3, "spanGaps": true, "pointRadius": 2}]
   },
   options:{...chtDefaults,
     scales:{
